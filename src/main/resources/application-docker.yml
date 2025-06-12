@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgresql_rescue_me_api:5432/rescuemedb
+    username: IgnacioVillarreal
+    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  rabbitmq:
+    host: rabbitmq_rescue_me_api
+    port: 5672
+    username: IgnacioVillarreal
+    password: 12345678
+
+  cache:
+    type: redis
+  data:
+    redis:
+      host: redis_rescue_me_api
+      port: 6379
+
+jwt:
+  secret: 23e586808ea364607079ec5b830ba702e80680339864b175eb2f5a13abd214e7
+
+cors:
+  allowed-origins:
+    - http://localhost:4200/
+
+rabbit:
+  exchange:
+    user-register: authapi.user.register.exchange
+  queue:
+    user-register-command: authapi.user.register.command.queue
+    user-register-reply: authapi.user.register.reply.queue
+    compensate-user-register-command: authapi.user.register.compensate.command.queue
+  routing-key:
+    user-register-command: authapi.user.register.command
+    user-register-reply: authapi.user.register.reply
+    compensate-user-register-command: authapi.user.register.compensate.command
+
+media-api:
+  url: http://media_api:8080/
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: RescueMeApi
+  profiles:
+    active: dev
+server:
+  port: 8081
