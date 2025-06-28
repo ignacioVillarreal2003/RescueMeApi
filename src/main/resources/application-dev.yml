@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/rescuemedb
-    username: IgnacioVillarreal
+    url: jdbc:postgresql://localhost:5432/main_db
+    username: ignacio
     password: 12345678
   jpa:
     hibernate:
@@ -9,20 +9,20 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        default_schema: rescue_me_schema
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: 10MB
-      max-request-size: 10MB
 
   rabbitmq:
     host: localhost
     port: 5672
-    username: IgnacioVillarreal
+    username: ignacio
     password: 12345678
+
+  flyway:
+    enabled: true
+    schemas: rescue_me_schema
+    locations: classpath:db/migration
 
   cache:
     type: redis
@@ -37,21 +37,7 @@ jwt:
 cors:
   allowed-origins:
     - http://localhost:4200/
-
-rabbit:
-  exchange:
-    user-register: authapi.user.register.exchange
-  queue:
-    user-register-command: authapi.user.register.command.queue
-    user-register-reply: authapi.user.register.reply.queue
-    compensate-user-register-command: authapi.user.register.compensate.command.queue
-  routing-key:
-    user-register-command: authapi.user.register.command
-    user-register-reply: authapi.user.register.reply
-    compensate-user-register-command: authapi.user.register.compensate.command
-
-media-api:
-  url: http://localhost:8083/
+    - http://localhost:8083/
 
 logging:
   level:

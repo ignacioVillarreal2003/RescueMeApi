@@ -1,7 +1,27 @@
 spring:
   application:
     name: RescueMeApi
+
   profiles:
     active: dev
+
 server:
   port: 8081
+
+servlet:
+  multipart:
+    enabled: true
+    max-file-size: 10MB
+    max-request-size: 10MB
+
+rabbit:
+  exchange:
+    user-register: authapi.user.register.exchange
+  queue:
+    user-register-command: authapi.user.register.command.queue
+    user-register-reply: authapi.user.register.reply.queue
+    compensate-user-register-command: authapi.user.register.compensate.command.queue
+  routing-key:
+    user-register-command: authapi.user.register.command
+    user-register-reply: authapi.user.register.reply
+    compensate-user-register-command: authapi.user.register.compensate.command
