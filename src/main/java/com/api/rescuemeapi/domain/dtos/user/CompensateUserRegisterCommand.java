@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @Builder
-public class CompensateRegisterUserCommand implements Serializable {
+public class CompensateUserRegisterCommand implements Serializable {
     private UUID sagaId;
     private String reason;
     private Long userId;

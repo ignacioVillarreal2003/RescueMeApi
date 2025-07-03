@@ -1,9 +1,9 @@
 package com.api.rescuemeapi.api.consumers;
 
-import com.api.rescuemeapi.api.producers.RegisterUserSagaPublisher;
+import com.api.rescuemeapi.api.producers.UserRegisterSagaPublisher;
 import com.api.rescuemeapi.application.services.UserService;
-import com.api.rescuemeapi.domain.dtos.user.CompensateRegisterUserCommand;
-import com.api.rescuemeapi.domain.dtos.user.RegisterUserReply;
+import com.api.rescuemeapi.domain.dtos.user.CompensateUserRegisterCommand;
+import com.api.rescuemeapi.domain.dtos.user.UserRegisterReply;
 import com.api.rescuemeapi.domain.dtos.user.UserResponse;
 import com.api.rescuemeapi.infrastructure.persistence.SagaStore;
 import jakarta.validation.Valid;
@@ -16,22 +16,22 @@ import org.springframework.validation.annotation.Validated;
 @Component
 @RequiredArgsConstructor
 @Validated
-public class RegisterUserSagaConsumer {
+public class UserRegisterSagaConsumer {
 
     private final UserService userService;
-    private final RegisterUserSagaPublisher registrationPublisher;
+    private final UserRegisterSagaPublisher userRegisterSagaPublisher;
     private final SagaStore sagaStore;
 
     @RabbitListener(queues = "${rabbit.queue.user-register-reply}")
-    public void handleRegisterUserReply(@Valid @Payload RegisterUserReply message) {
+    public void handleRegisterUserReply(@Valid @Payload UserRegisterReply message) {
         if (message.success()) {
             sagaStore.getInitiateRegisterUser(message.sagaId()).ifPresentOrElse(request -> {
                 try {
                     UserResponse response = userService.completeRegistration(request, message);
                     sagaStore.putSuccessRegisterUserSagaCache(message.sagaId(), response, message.token(), message.refreshToken());
                 } catch (Exception e) {
-                    registrationPublisher.publishCompensateUserRegisterCommand(
-                            CompensateRegisterUserCommand.builder()
+                    userRegisterSagaPublisher.publishCompensateUserRegisterCommand(
+                            CompensateUserRegisterCommand.builder()
                                     .sagaId(message.sagaId())
                                     .userId(message.userId())
                                     .reason(e.getMessage())

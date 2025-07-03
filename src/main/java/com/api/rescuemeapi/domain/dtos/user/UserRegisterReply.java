@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record RegisterUserReply(
+public record UserRegisterReply(
 
         @NotNull(message = "Saga id is required")
         UUID sagaId,

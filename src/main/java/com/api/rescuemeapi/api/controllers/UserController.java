@@ -36,10 +36,10 @@ public class UserController {
 
     @GetMapping("registration/status/{sagaId}")
     public ResponseEntity<?> getRegistrationStatus(@PathVariable UUID sagaId) {
-        Optional<RegisterUserSagaResponse> registerUserSagaResponse = sagaStore.getRegisterUserSagaCache(sagaId);
+        Optional<UserRegisterSagaResponse> registerUserSagaResponse = sagaStore.getRegisterUserSagaCache(sagaId);
 
         if (registerUserSagaResponse.isPresent()) {
-            RegisterUserSagaResponse response = registerUserSagaResponse.get();
+            UserRegisterSagaResponse response = registerUserSagaResponse.get();
             if (response.isSuccess()) {
                 return ResponseEntity.ok(response.getUser());
             } else {

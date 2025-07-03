@@ -53,7 +53,7 @@ public class UserService {
                 .build();
     }
 
-    public UserResponse completeRegistration(InitiateRegisterUserRequest request, RegisterUserReply message) {
+    public UserResponse completeRegistration(InitiateRegisterUserRequest request, UserRegisterReply message) {
         Long userId = message.userId();
 
         User user = userRepository.findById(userId).orElse(null);

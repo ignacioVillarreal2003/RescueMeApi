@@ -11,21 +11,26 @@ import org.springframework.stereotype.Component;
 @Setter
 public class RabbitProperties {
     private Exchange exchange;
-    private QueueProperties queue;
+    private Queue queue;
     private RoutingKey routingKey;
 
     @Getter
     @Setter
     public static class Exchange {
-        private String userRegister;
+        private String auth;
+        private String media;
     }
 
     @Getter
     @Setter
-    public static class QueueProperties {
+    public static class Queue {
         private String userRegisterCommand;
         private String userRegisterReply;
         private String compensateUserRegisterCommand;
+        private String createImagesCommand;
+        private String reorderImagesCommand;
+        private String deleteImageCommand;
+        private String deleteImagesByReferenceCommand;
     }
 
     @Getter
@@ -34,5 +39,9 @@ public class RabbitProperties {
         private String userRegisterCommand;
         private String userRegisterReply;
         private String compensateUserRegisterCommand;
+        private String createImagesCommand;
+        private String reorderImagesCommand;
+        private String deleteImageCommand;
+        private String deleteImagesByReferenceCommand;
     }
 }

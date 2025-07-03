@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class RegisterUserSagaResponse {
+public class UserRegisterSagaResponse {
     boolean success;
     UserResponse user;
     String errorMessage;

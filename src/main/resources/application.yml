@@ -16,12 +16,21 @@ servlet:
 
 rabbit:
   exchange:
-    user-register: authapi.user.register.exchange
+    auth: authApi.exchange
+    media: mediaApi.exchange
   queue:
-    user-register-command: authapi.user.register.command.queue
-    user-register-reply: authapi.user.register.reply.queue
-    compensate-user-register-command: authapi.user.register.compensate.command.queue
+    user-register-command: authApi.userRegisterCommand.queue
+    user-register-reply: authApi.userRegisterReply.queue
+    compensate-user-register-command: authApi.userRegisterCompensateCommand.queue
+    create-images-command: mediaApi.createImagesCommand.queue
+    reorder-images-command: mediaApi.reorderImagesCommand.queue
+    delete-image-command: mediaApi.deleteImageCommand.queue
+    delete-images-by-reference-command: mediaApi.deleteImagesByReferenceCommand.queue
   routing-key:
-    user-register-command: authapi.user.register.command
-    user-register-reply: authapi.user.register.reply
-    compensate-user-register-command: authapi.user.register.compensate.command
+    user-register-command: authApi.userRegisterCommand.routingKey
+    user-register-reply: authApi.userRegisterReply.routingKey
+    compensate-user-register-command: authApi.userRegisterCompensateCommand.routingKey
+    create-images-command: mediaApi.createImagesCommand.routingKey
+    reorder-images-command: mediaApi.reorderImagesCommand.routingKey
+    delete-image-command: mediaApi.deleteImageCommand.routingKey
+    delete-images-by-reference-command: mediaApi.deleteImagesByReferenceCommand.routingKey

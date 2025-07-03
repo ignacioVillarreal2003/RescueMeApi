@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
-public class RegisterUserCommand implements Serializable {
+public class UserRegisterCommand implements Serializable {
         private UUID sagaId;
         private String email;
         private String password;

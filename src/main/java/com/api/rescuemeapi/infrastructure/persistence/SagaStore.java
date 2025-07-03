@@ -1,7 +1,7 @@
 package com.api.rescuemeapi.infrastructure.persistence;
 
 import com.api.rescuemeapi.domain.dtos.user.InitiateRegisterUserRequest;
-import com.api.rescuemeapi.domain.dtos.user.RegisterUserSagaResponse;
+import com.api.rescuemeapi.domain.dtos.user.UserRegisterSagaResponse;
 import com.api.rescuemeapi.domain.dtos.user.UserResponse;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -15,7 +15,7 @@ import java.util.UUID;
 public class SagaStore {
 
     private final Cache<UUID, InitiateRegisterUserRequest> initiateRegisterUserCache;
-    private final Cache<UUID, RegisterUserSagaResponse> registerUserSagaCache;
+    private final Cache<UUID, UserRegisterSagaResponse> registerUserSagaCache;
 
     public SagaStore() {
         this.initiateRegisterUserCache = Caffeine.newBuilder()
@@ -41,7 +41,7 @@ public class SagaStore {
     }
 
     public void putSuccessRegisterUserSagaCache(UUID sagaId, UserResponse response, String token, String refreshToken) {
-        registerUserSagaCache.put(sagaId, RegisterUserSagaResponse.builder()
+        registerUserSagaCache.put(sagaId, UserRegisterSagaResponse.builder()
                 .success(true)
                 .user(response)
                 .errorMessage(null)
@@ -51,14 +51,14 @@ public class SagaStore {
     }
 
     public void putFailureRegisterUserSagaCache(UUID sagaId, String error) {
-        registerUserSagaCache.put(sagaId, RegisterUserSagaResponse.builder()
+        registerUserSagaCache.put(sagaId, UserRegisterSagaResponse.builder()
                 .success(false)
                 .user(null)
                 .errorMessage(error)
                 .build());
     }
 
-    public Optional<RegisterUserSagaResponse> getRegisterUserSagaCache(UUID sagaId) {
+    public Optional<UserRegisterSagaResponse> getRegisterUserSagaCache(UUID sagaId) {
         return Optional.ofNullable(registerUserSagaCache.getIfPresent(sagaId));
     }
 
