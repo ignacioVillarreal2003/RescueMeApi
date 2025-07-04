@@ -15,7 +15,7 @@ public class UserRegisterSagaPublisher {
     private final RabbitTemplate rabbitTemplate;
     private final RabbitProperties rabbitProperties;
 
-    public void publishRegisterUserCommand(UserRegisterCommand message) {
+    public void publishUserRegisterCommand(UserRegisterCommand message) {
         rabbitTemplate.convertAndSend(
                 rabbitProperties.getExchange().getAuth(),
                 rabbitProperties.getRoutingKey().getUserRegisterCommand(),

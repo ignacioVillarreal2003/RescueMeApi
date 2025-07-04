@@ -1,6 +1,6 @@
 package com.api.rescuemeapi.application.services;
 
-import com.api.rescuemeapi.api.producers.RegisterUserSagaPublisher;
+import com.api.rescuemeapi.api.producers.UserRegisterSagaPublisher;
 import com.api.rescuemeapi.application.helpers.UserHelper;
 import com.api.rescuemeapi.domain.dtos.user.*;
 import com.api.rescuemeapi.application.mappers.UserResponseMapper;
@@ -24,7 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserHelper userHelper;
     private final UserResponseMapper userResponseMapper;
-    private final RegisterUserSagaPublisher registrationPublisher;
+    private final UserRegisterSagaPublisher userRegisterSagaPublisher;
     private final SagaStore sagaStore;
 
     public UserResponse get(Long id) {
@@ -39,8 +39,8 @@ public class UserService {
 
         sagaStore.putInitiateRegisterUser(sagaId, request);
 
-        registrationPublisher.publishRegisterUserCommand(
-                RegisterUserCommand.builder()
+        userRegisterSagaPublisher.publishUserRegisterCommand(
+                UserRegisterCommand.builder()
                         .sagaId(sagaId)
                         .email(request.email())
                         .password(request.password())

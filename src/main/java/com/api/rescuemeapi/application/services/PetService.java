@@ -33,6 +33,7 @@ public class PetService {
     private final PetHelper petHelper;
     private final UserHelper userHelper;
     private final PetitionHelper petitionHelper;
+    private final ImageService imageService;
 
     public Page<PetResponse> getAll(PetFilterRequest filter) {
         Specification<Pet> spec = getSpecification(filter);
@@ -88,6 +89,8 @@ public class PetService {
                         .ownerUser(user)
                         .referenceId(referenceId)
                         .build());
+        
+        imageService.createImages(request.files(), referenceId);
 
         return petResponseMapper.apply(createdPet);
     }
@@ -114,6 +117,13 @@ public class PetService {
         if (request.isCastrated() != null) pet.setIsCastrated(request.isCastrated());
         if (request.isDewormed() != null) pet.setIsDewormed(request.isDewormed());
         if (request.medicalNotes() != null) pet.setMedicalNotes(request.medicalNotes());
+        
+        if (request.deletedImageId() != null) {
+            imageService.deleteImage(request.deletedImageId(), pet.getReferenceId());
+        }
+        if (request.images() != null) {
+            imageService.createImages(request.images(), pet.getReferenceId());
+        }
 
         Pet updated = petRepository.save(pet);
 
@@ -149,6 +159,8 @@ public class PetService {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Only the pet owner may delete this petition");
         }
+
+        imageService.deleteImages(pet.getReferenceId());
 
         petRepository.delete(pet);
     }

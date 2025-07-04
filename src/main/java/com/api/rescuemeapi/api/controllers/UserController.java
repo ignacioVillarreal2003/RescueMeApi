@@ -28,7 +28,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<InitiateRegisterUserResponse> initiateRegistration(@Valid @RequestBody InitiateRegisterUserRequest request) {
         InitiateRegisterUserResponse response = userService.initiateRegistration(request);
         return ResponseEntity.ok(response);

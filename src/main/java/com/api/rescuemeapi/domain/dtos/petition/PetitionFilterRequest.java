@@ -1,10 +1,8 @@
 package com.api.rescuemeapi.domain.dtos.petition;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class PetitionFilterRequest {
     private Boolean isRequestingByUser;
     private Long petId;

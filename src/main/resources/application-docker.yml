@@ -37,7 +37,6 @@ jwt:
 cors:
   allowed-origins:
     - http://rescue_me_app:4200/
-    - http://media_api:8080/
 
 logging:
   level:

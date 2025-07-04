@@ -1,4 +1,4 @@
-package com.api.rescuemeapi.exception;
+package com.api.rescuemeapi.application.handlers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

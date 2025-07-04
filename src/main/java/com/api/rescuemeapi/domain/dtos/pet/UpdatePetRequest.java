@@ -43,7 +43,7 @@ public record UpdatePetRequest (
 
         PetState state,
 
-        List<MultipartFile> files,
+        List<MultipartFile> images,
 
         Long deletedImageId
 ) {

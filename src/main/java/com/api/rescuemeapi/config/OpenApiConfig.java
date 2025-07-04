@@ -22,9 +22,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("RescueMe API")
-                        .version("1.0.0")
-                        .description("Documentación de la API para la aplicación RescueMe"))
+                        .title("RescueMe API"))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 .components(new Components().addSecuritySchemes("BearerAuth",
                         new io.swagger.v3.oas.models.security.SecurityScheme()

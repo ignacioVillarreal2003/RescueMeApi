@@ -1,10 +1,15 @@
 package com.api.rescuemeapi.domain.dtos.image;
 
 import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.util.UUID;
 
-import lombok.Builder;
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class DeleteImageCommand implements Serializable {
     private UUID sagaId;
