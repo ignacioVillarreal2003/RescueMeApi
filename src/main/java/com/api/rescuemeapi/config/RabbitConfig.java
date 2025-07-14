@@ -3,6 +3,7 @@ package com.api.rescuemeapi.config;
 import com.api.rescuemeapi.config.properties.RabbitProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -14,51 +15,39 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class RabbitConfig {
 
-     private final RabbitProperties rabbitProperties;
+    private final RabbitProperties rabbitProperties;
 
     @Bean
     public TopicExchange authExchange() {
-        return new TopicExchange(rabbitProperties.getExchange().getAuth());
+        return new TopicExchange(rabbitProperties.getExchange().getAuth(), true, false);
     }
 
-        @Bean
-    public TopicExchange mediaExchange() {
-        return new TopicExchange(rabbitProperties.getExchange().getMedia());
+    @Bean
+    public DirectExchange authDlx() {
+        return new DirectExchange(rabbitProperties.getExchange().getAuth() + ".dlx", true, false);
     }
 
     @Bean
     public Queue userRegisterCommandQueue() {
-        return new Queue(rabbitProperties.getQueue().getUserRegisterCommand());
+        return QueueBuilder.durable(rabbitProperties.getQueue().getUserRegisterCommand())
+                .withArgument("x-dead-letter-exchange", rabbitProperties.getExchange().getAuth() + ".dlx")
+                .withArgument("x-dead-letter-routing-key", rabbitProperties.getRoutingKey().getUserRegisterCommand() + ".dlq")
+                .build();
+    }
+
+    @Bean
+    public Queue userRegisterCommandDlq() {
+        return QueueBuilder.durable(rabbitProperties.getQueue().getUserRegisterCommand() + ".dlq").build();
     }
 
     @Bean
     public Queue userRegisterReplyQueue() {
-        return new Queue(rabbitProperties.getQueue().getUserRegisterReply());
+        return QueueBuilder.durable(rabbitProperties.getQueue().getUserRegisterReply()).build();
     }
 
     @Bean
     public Queue compensateUserRegisterCommandQueue() {
-        return new Queue(rabbitProperties.getQueue().getCompensateUserRegisterCommand());
-    }
-
-    @Bean
-    public Queue createImagesCommandQueue() {
-        return new Queue(rabbitProperties.getQueue().getCreateImagesCommand());
-    }
-
-    @Bean
-    public Queue reorderImagesCommandQueue() {
-        return new Queue(rabbitProperties.getQueue().getReorderImagesCommand());
-    }
-
-    @Bean
-    public Queue deleteImageCommandQueue() {
-        return new Queue(rabbitProperties.getQueue().getDeleteImageCommand());
-    }
-
-    @Bean
-    public Queue deleteImagesByReferenceCommandQueue() {
-        return new Queue(rabbitProperties.getQueue().getDeleteImagesByReferenceCommand());
+        return QueueBuilder.durable(rabbitProperties.getQueue().getCompensateUserRegisterCommand()).build();
     }
 
     @Bean
@@ -67,6 +56,14 @@ public class RabbitConfig {
                 .bind(userRegisterCommandQueue())
                 .to(authExchange())
                 .with(rabbitProperties.getRoutingKey().getUserRegisterCommand());
+    }
+
+    @Bean
+    public Binding bindingUserRegisterDlq() {
+        return BindingBuilder
+                .bind(userRegisterCommandDlq())
+                .to(authDlx())
+                .with(rabbitProperties.getRoutingKey().getUserRegisterCommand() + ".dlq");
     }
 
     @Bean
@@ -86,38 +83,6 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Binding bindingCreateImagesCommand() {
-        return BindingBuilder
-                .bind(createImagesCommandQueue())
-                .to(mediaExchange())
-                .with(rabbitProperties.getRoutingKey().getCreateImagesCommand());
-    }
-
-    @Bean
-    public Binding bindingReorderImagesCommand() {
-        return BindingBuilder
-                .bind(reorderImagesCommandQueue())
-                .to(mediaExchange())
-                .with(rabbitProperties.getRoutingKey().getReorderImagesCommand());
-    }
-
-    @Bean
-    public Binding bindingDeleteImageCommand() {
-        return BindingBuilder
-                .bind(deleteImageCommandQueue())
-                .to(mediaExchange())
-                .with(rabbitProperties.getRoutingKey().getDeleteImageCommand());
-    }
-
-    @Bean
-    public Binding bindingDeleteImagesByReferenceCommand() {
-        return BindingBuilder
-                .bind(deleteImagesByReferenceCommandQueue())
-                .to(mediaExchange())
-                .with(rabbitProperties.getRoutingKey().getDeleteImagesByReferenceCommand());
-    }
-
-    @Bean
     public MessageConverter converter() {
         return new Jackson2JsonMessageConverter();
     }
@@ -127,5 +92,19 @@ public class RabbitConfig {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(converter());
         return rabbitTemplate;
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            MessageConverter messageConverter) {
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(messageConverter);
+
+        factory.setReceiveTimeout(30_000L);
+        factory.setDefaultRequeueRejected(false);
+
+        return factory;
     }
 }

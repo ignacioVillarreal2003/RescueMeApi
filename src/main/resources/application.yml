@@ -7,30 +7,3 @@ spring:
 
 server:
   port: 8081
-
-servlet:
-  multipart:
-    enabled: true
-    max-file-size: 10MB
-    max-request-size: 10MB
-
-rabbit:
-  exchange:
-    auth: authApi.exchange
-    media: mediaApi.exchange
-  queue:
-    user-register-command: authApi.userRegisterCommand.queue
-    user-register-reply: authApi.userRegisterReply.queue
-    compensate-user-register-command: authApi.userRegisterCompensateCommand.queue
-    create-images-command: mediaApi.createImagesCommand.queue
-    reorder-images-command: mediaApi.reorderImagesCommand.queue
-    delete-image-command: mediaApi.deleteImageCommand.queue
-    delete-images-by-reference-command: mediaApi.deleteImagesByReferenceCommand.queue
-  routing-key:
-    user-register-command: authApi.userRegisterCommand.routingKey
-    user-register-reply: authApi.userRegisterReply.routingKey
-    compensate-user-register-command: authApi.userRegisterCompensateCommand.routingKey
-    create-images-command: mediaApi.createImagesCommand.routingKey
-    reorder-images-command: mediaApi.reorderImagesCommand.routingKey
-    delete-image-command: mediaApi.deleteImageCommand.routingKey
-    delete-images-by-reference-command: mediaApi.deleteImagesByReferenceCommand.routingKey

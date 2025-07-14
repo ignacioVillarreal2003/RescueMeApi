@@ -1,12 +1,13 @@
 package com.api.rescuemeapi.application.services;
 
 import com.api.rescuemeapi.api.producers.UserRegisterSagaPublisher;
-import com.api.rescuemeapi.application.helpers.UserHelper;
+import com.api.rescuemeapi.application.exceptions.UserNotFoundException;
+import com.api.rescuemeapi.application.helpers.UserHelperService;
 import com.api.rescuemeapi.domain.dtos.user.*;
 import com.api.rescuemeapi.application.mappers.UserResponseMapper;
-import com.api.rescuemeapi.domain.enums.Role;
+import com.api.rescuemeapi.domain.constants.Role;
 import com.api.rescuemeapi.domain.models.User;
-import com.api.rescuemeapi.infrastructure.persistence.SagaStore;
+import com.api.rescuemeapi.domain.models.UserRegisterSaga;
 import com.api.rescuemeapi.infrastructure.persistence.repositories.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +23,14 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserHelper userHelper;
+    private final UserHelperService userHelper;
     private final UserResponseMapper userResponseMapper;
     private final UserRegisterSagaPublisher userRegisterSagaPublisher;
-    private final SagaStore sagaStore;
+    private final UserRegisterSagaService userRegisterSagaService;
 
-    public UserResponse get(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
 
         return userResponseMapper.apply(user);
     }
@@ -37,14 +38,14 @@ public class UserService {
     public InitiateRegisterUserResponse initiateRegistration(@Valid InitiateRegisterUserRequest request) {
         UUID sagaId = UUID.randomUUID();
 
-        sagaStore.putInitiateRegisterUser(sagaId, request);
+        userRegisterSagaService.startSaga(sagaId, request.firstName(), request.lastName(), request.phone(), request.email());
 
         userRegisterSagaPublisher.publishUserRegisterCommand(
                 UserRegisterCommand.builder()
                         .sagaId(sagaId)
                         .email(request.email())
                         .password(request.password())
-                        .roles(List.of(Role.RESCUEME_USER))
+                        .roles(List.of(Role.ROLE_RESCUE_ME_USER.toString()))
                         .build()
         );
 
@@ -53,31 +54,31 @@ public class UserService {
                 .build();
     }
 
-    public UserResponse completeRegistration(InitiateRegisterUserRequest request, UserRegisterReply message) {
-        Long userId = message.userId();
+    public UserResponse completeRegistration(UserRegisterReply message) {
+        String email = message.email();
 
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findByEmail(email).orElse(null);
 
         if (user != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
 
+        UserRegisterSaga userRegisterSaga = userRegisterSagaService.getUserRegisterSaga(message.sagaId());
+
         User createdUser = userRepository.save(
                 User.builder()
-                        .id(userId)
-                        .firstName(request.firstName())
-                        .lastName(request.lastName())
-                        .phone(request.phone())
-                        .address(request.address())
+                        .email(email)
+                        .firstName(userRegisterSaga.getFirstName())
+                        .lastName(userRegisterSaga.getLastName())
+                        .phone(userRegisterSaga.getPhone())
+                        .address(userRegisterSaga.getAddress())
                         .build());
 
         return userResponseMapper.apply(createdUser);
     }
 
-    public UserResponse update(UpdateUserRequest request) {
-        User user = userHelper.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Authenticated user not found"));
+    public UserResponse updateUser(UpdateUserRequest request) {
+        User user = userHelper.getCurrentUser();
 
         if (request.firstName() != null) user.setFirstName(request.firstName());
         if (request.lastName() != null) user.setLastName(request.lastName());

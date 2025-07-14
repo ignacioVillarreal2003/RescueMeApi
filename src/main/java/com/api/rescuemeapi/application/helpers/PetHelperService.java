@@ -1,23 +1,22 @@
 package com.api.rescuemeapi.application.helpers;
 
-import com.api.rescuemeapi.config.authentication.AuthUserProvider;
-import com.api.rescuemeapi.domain.enums.PetState;
+import com.api.rescuemeapi.application.exceptions.PetNotFoundException;
+import com.api.rescuemeapi.config.authentication.AuthenticationUserProvider;
+import com.api.rescuemeapi.domain.constants.PetState;
 import com.api.rescuemeapi.domain.models.Pet;
 import com.api.rescuemeapi.infrastructure.persistence.repositories.PetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
-public class PetHelper {
+public class PetHelperService {
 
     private final PetRepository petRepository;
-    private final AuthUserProvider authUserProvider;
+    private final AuthenticationUserProvider authenticationUserProvider;
 
-    public Optional<Pet> findById(Long id) {
-        return petRepository.findById(id);
+    public Pet findById(Long id) {
+        return petRepository.findById(id).orElseThrow(PetNotFoundException::new);
     }
 
     public boolean isAvailable(Pet pet) {
@@ -30,7 +29,7 @@ public class PetHelper {
 
     public boolean isOwner(Pet pet) {
         return pet.getOwnerUser()
-                .getId()
-                .equals(authUserProvider.getUserId());
+                .getEmail()
+                .equals(authenticationUserProvider.getUser().getUsername());
     }
 }

@@ -18,38 +18,38 @@ public class PetController {
 
     @GetMapping()
     public ResponseEntity<Page<PetResponse>> getPets(@ModelAttribute PetFilterRequest filter) {
-        Page<PetResponse> response = petService.getAll(filter);
+        Page<PetResponse> response = petService.getAllPets(filter);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PetResponse> getPet(@PathVariable Long id) {
-        PetResponse response = petService.get(id);
+        PetResponse response = petService.getPet(id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<PetResponse> createPet(@Valid @ModelAttribute CreatePetRequest request) {
-        PetResponse response = petService.create(request);
+        PetResponse response = petService.createPet(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PetResponse> updatePet(@PathVariable Long id,
                                                  @Valid @ModelAttribute UpdatePetRequest request) {
-        PetResponse response = petService.update(id, request);
+        PetResponse response = petService.updatePet(id, request);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/adopt/user/{userId}")
-    public ResponseEntity<PetResponse> adoptPet(@PathVariable Long id, @PathVariable Long userId) {
-        PetResponse response = petService.adopt(id, userId);
+    @PutMapping("/{id}/adopt/user/{email}")
+    public ResponseEntity<PetResponse> adoptPet(@PathVariable Long id, @PathVariable String email) {
+        PetResponse response = petService.adoptPet(id, email);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePet(@PathVariable Long id) {
-        petService.delete(id);
+        petService.deletePet(id);
         return ResponseEntity.noContent().build();
     }
 }

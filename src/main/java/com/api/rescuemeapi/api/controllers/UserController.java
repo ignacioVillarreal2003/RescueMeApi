@@ -1,17 +1,13 @@
 package com.api.rescuemeapi.api.controllers;
 
+import com.api.rescuemeapi.application.services.UserRegisterSagaService;
 import com.api.rescuemeapi.domain.dtos.user.*;
 import com.api.rescuemeapi.application.services.UserService;
-import com.api.rescuemeapi.infrastructure.persistence.SagaStore;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -20,11 +16,11 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final SagaStore sagaStore;
+    private final UserRegisterSagaService userRegisterSagaService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
-        UserResponse response = userService.get(id);
+    @GetMapping("/{email}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable String email) {
+        UserResponse response = userService.getUserByEmail(email);
         return ResponseEntity.ok(response);
     }
 
@@ -35,26 +31,14 @@ public class UserController {
     }
 
     @GetMapping("registration/status/{sagaId}")
-    public ResponseEntity<?> getRegistrationStatus(@PathVariable UUID sagaId) {
-        Optional<UserRegisterSagaResponse> registerUserSagaResponse = sagaStore.getRegisterUserSagaCache(sagaId);
-
-        if (registerUserSagaResponse.isPresent()) {
-            UserRegisterSagaResponse response = registerUserSagaResponse.get();
-            if (response.isSuccess()) {
-                return ResponseEntity.ok(response.getUser());
-            } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, response.getErrorMessage());
-            }
-        }
-        else {
-            return ResponseEntity.status(202)
-                    .body(Map.of("status", "PENDING"));
-        }
+    public ResponseEntity<UserRegisterSagaResponse> getRegistrationStatus(@PathVariable UUID sagaId) {
+        UserRegisterSagaResponse response = userRegisterSagaService.getUserRegisterSagaResponse(sagaId);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping
     public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UpdateUserRequest request) {
-        UserResponse response = userService.update(request);
+        UserResponse response = userService.updateUser(request);
         return ResponseEntity.ok(response);
     }
 }

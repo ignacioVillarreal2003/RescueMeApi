@@ -1,12 +1,12 @@
 package com.api.rescuemeapi.application.services;
 
-import com.api.rescuemeapi.application.helpers.PetHelper;
-import com.api.rescuemeapi.application.helpers.PetitionHelper;
-import com.api.rescuemeapi.application.helpers.UserHelper;
+import com.api.rescuemeapi.application.helpers.PetHelperService;
+import com.api.rescuemeapi.application.helpers.PetitionHelperService;
+import com.api.rescuemeapi.application.helpers.UserHelperService;
 import com.api.rescuemeapi.application.mappers.PetitionResponseMapper;
 import com.api.rescuemeapi.domain.models.Pet;
 import com.api.rescuemeapi.domain.models.User;
-import com.api.rescuemeapi.domain.enums.PetitionStatus;
+import com.api.rescuemeapi.domain.constants.PetitionStatus;
 import com.api.rescuemeapi.domain.dtos.petition.CreatePetitionRequest;
 import com.api.rescuemeapi.domain.dtos.petition.PetitionResponse;
 import com.api.rescuemeapi.domain.models.Petition;
@@ -27,15 +27,13 @@ import java.util.stream.Collectors;
 public class PetitionService {
 
     private final PetitionRepository petitionRepository;
-    private final PetitionHelper petitionHelper;
-    private final UserHelper userHelper;
-    private final PetHelper petHelper;
+    private final PetitionHelperService petitionHelper;
+    private final UserHelperService userHelper;
+    private final PetHelperService petHelper;
     private final PetitionResponseMapper petitionResponseMapper;
 
-    public List<PetitionResponse> getAllByUser() {
-        User user = userHelper.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Authenticated user not found"));
+    public List<PetitionResponse> getAllPetitionsByUser() {
+        User user = userHelper.getCurrentUser();
 
         return petitionRepository.findAllByRequestingUser(user)
                 .stream()
@@ -43,10 +41,8 @@ public class PetitionService {
                 .collect(Collectors.toList());
     }
 
-    public List<PetitionResponse> getAllByPet(Long petId) {
-        Pet pet = petHelper.findById(petId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Pet not found"));
+    public List<PetitionResponse> getAllPetitionsByPet(Long petId) {
+        Pet pet = petHelper.findById(petId);
 
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
@@ -59,14 +55,10 @@ public class PetitionService {
                 .collect(Collectors.toList());
     }
 
-    public PetitionResponse create(CreatePetitionRequest request) {
-        User user = userHelper.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Authenticated user not found"));
+    public PetitionResponse createPetition(CreatePetitionRequest request) {
+        User user = userHelper.getCurrentUser();
 
-        Pet pet = petHelper.findById(request.petId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Pet not found"));
+        Pet pet = petHelper.findById(request.petId());
 
         if (petHelper.isAdopted(pet)) {
             throw new ResponseStatusException(
@@ -98,10 +90,8 @@ public class PetitionService {
         return petitionResponseMapper.apply(saved);
     }
 
-    public PetitionResponse update(Long id, UpdatePetitionRequest request) {
-        Petition petition = petitionHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Petition not found"));
+    public PetitionResponse updatePetition(Long id, UpdatePetitionRequest request) {
+        Petition petition = petitionHelper.findById(id);
 
         if (!petitionHelper.isRequestingUser(petition)) {
             throw new ResponseStatusException(
@@ -115,10 +105,8 @@ public class PetitionService {
         return petitionResponseMapper.apply(updated);
     }
 
-    public PetitionResponse approve(Long id) {
-        Petition petition = petitionHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Petition not found"));
+    public PetitionResponse approvePetition(Long id) {
+        Petition petition = petitionHelper.findById(id);
 
         if (!petitionHelper.isPetOwner(petition)) {
             throw new ResponseStatusException(
@@ -138,10 +126,8 @@ public class PetitionService {
         return petitionResponseMapper.apply(updated);
     }
 
-    public PetitionResponse decline(Long id) {
-        Petition petition = petitionHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Petition not found"));
+    public PetitionResponse declinePetition(Long id) {
+        Petition petition = petitionHelper.findById(id);
 
         if (!petitionHelper.isPetOwner(petition)) {
             throw new ResponseStatusException(
@@ -155,10 +141,8 @@ public class PetitionService {
         return petitionResponseMapper.apply(updatedPetition);
     }
 
-    public void delete(Long id) {
-        Petition petition = petitionHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Petition not found"));
+    public void deletePetition(Long id) {
+        Petition petition = petitionHelper.findById(id);
 
         if (!petitionHelper.isRequestingUser(petition)) {
             throw new ResponseStatusException(

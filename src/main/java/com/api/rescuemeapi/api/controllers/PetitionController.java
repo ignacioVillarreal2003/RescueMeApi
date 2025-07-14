@@ -21,44 +21,44 @@ public class PetitionController {
 
     @GetMapping("/user")
     public ResponseEntity<List<PetitionResponse>> getPetitionsByUser() {
-        List<PetitionResponse> response = petitionService.getAllByUser();
+        List<PetitionResponse> response = petitionService.getAllPetitionsByUser();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/pet/{id}")
     public ResponseEntity<List<PetitionResponse>> getPetitionsByPet(@PathVariable Long id) {
-        List<PetitionResponse> response = petitionService.getAllByPet(id);
+        List<PetitionResponse> response = petitionService.getAllPetitionsByPet(id);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<PetitionResponse> createPetition(@Valid @RequestBody CreatePetitionRequest request) {
-        PetitionResponse response = petitionService.create(request);
+        PetitionResponse response = petitionService.createPetition(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PetitionResponse> updatePetition(@PathVariable Long id,
                                                            @Valid @RequestBody UpdatePetitionRequest request) {
-        PetitionResponse response = petitionService.update(id, request);
+        PetitionResponse response = petitionService.updatePetition(id, request);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/approve")
     public ResponseEntity<PetitionResponse> approvePetition(@PathVariable Long id) {
-        PetitionResponse response = petitionService.approve(id);
+        PetitionResponse response = petitionService.approvePetition(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/decline")
     public ResponseEntity<PetitionResponse> declinePetition(@PathVariable Long id) {
-        PetitionResponse response = petitionService.decline(id);
+        PetitionResponse response = petitionService.declinePetition(id);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePetition(@PathVariable Long id) {
-        petitionService.delete(id);
+        petitionService.deletePetition(id);
         return ResponseEntity.noContent().build();
     }
 }

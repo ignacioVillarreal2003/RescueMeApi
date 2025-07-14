@@ -1,13 +1,11 @@
 package com.api.rescuemeapi.domain.models;
 
-import com.api.rescuemeapi.domain.enums.*;
+import com.api.rescuemeapi.domain.constants.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "pet")
@@ -17,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Audited
-public class Pet extends Auditable<Long> {
+public class Pet extends Auditable<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +38,7 @@ public class Pet extends Auditable<Long> {
     @Enumerated(EnumType.STRING)
     private PetSize size;
 
+    @Builder.Default
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PetState state = PetState.AVAILABLE;
@@ -48,31 +47,38 @@ public class Pet extends Auditable<Long> {
     @Enumerated(EnumType.STRING)
     private PetSex sex;
 
+    @Builder.Default
     @Column(nullable = false)
     private String breed = Default.UNSPECIFIED.toString();
 
+    @Builder.Default
     @Column(nullable = false)
     private String color = Default.UNSPECIFIED.toString();
 
+    @Builder.Default
     @Column(nullable = false)
-    private Boolean isVaccinated = Boolean.FALSE;
+    private Boolean isVaccinated = false;
 
+    @Builder.Default
     @Column(nullable = false)
-    private Boolean isCastrated = Boolean.FALSE;
+    private Boolean isCastrated = false;
 
+    @Builder.Default
     @Column(nullable = false)
-    private Boolean isDewormed = Boolean.FALSE;
+    private Boolean isDewormed = false;
 
+    @Builder.Default
     @Column(nullable = false)
     private String medicalNotes = Default.UNSPECIFIED.toString();
 
     @Column(nullable = false)
     private UUID referenceId;
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_user_id", nullable = false)
     private User ownerUser;
 
-    @OneToMany(mappedBy = "requestedPet", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Petition> receivedPetitions = new ArrayList<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "requestedPet", cascade = CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)
+    private Set<Petition> receivedPetitions = new HashSet<>();
 }

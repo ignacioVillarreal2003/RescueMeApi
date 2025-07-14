@@ -1,6 +1,5 @@
 package com.api.rescuemeapi.domain.dtos.user;
 
-import com.api.rescuemeapi.domain.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +17,5 @@ public class UserRegisterCommand implements Serializable {
         private UUID sagaId;
         private String email;
         private String password;
-        private List<Role> roles;
+        private List<String> roles;
 }

@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.envers.Audited;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "usr")
@@ -14,10 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Audited
-public class User extends Auditable<Long> {
+public class User extends Auditable<String> {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(nullable = false)
     private String firstName;
@@ -31,9 +36,11 @@ public class User extends Auditable<Long> {
     @Column(nullable = false)
     private String address;
 
-    @OneToMany(mappedBy = "ownerUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pet> ownedPets;
+    @Builder.Default
+    @OneToMany(mappedBy = "ownerUser", cascade = CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)
+    private Set<Pet> ownedPets = new HashSet<>();
 
-    @OneToMany(mappedBy = "requestingUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Petition> sentPetitions;
+    @Builder.Default
+    @OneToMany(mappedBy = "requestingUser", cascade = CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)
+    private Set<Petition> sentPetitions =  new HashSet<>();
 }

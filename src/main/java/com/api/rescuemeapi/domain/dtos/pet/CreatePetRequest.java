@@ -1,8 +1,8 @@
 package com.api.rescuemeapi.domain.dtos.pet;
 
-import com.api.rescuemeapi.domain.enums.PetSex;
-import com.api.rescuemeapi.domain.enums.PetSize;
-import com.api.rescuemeapi.domain.enums.PetSpecies;
+import com.api.rescuemeapi.domain.constants.PetSex;
+import com.api.rescuemeapi.domain.constants.PetSize;
+import com.api.rescuemeapi.domain.constants.PetSpecies;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -32,9 +32,6 @@ public record CreatePetRequest (
         PetSize size,
 
         @NotNull(message = "Sex is required")
-        PetSex sex,
-
-        @NotNull(message = "Files is required")
-        List<MultipartFile> files
+        PetSex sex
 ) {
 }

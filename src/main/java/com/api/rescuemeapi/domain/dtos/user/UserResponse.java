@@ -12,7 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class UserResponse implements Serializable {
-    private Long id;
+    private String email;
     private String firstName;
     private String lastName;
     private String phone;

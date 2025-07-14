@@ -1,12 +1,12 @@
 package com.api.rescuemeapi.application.services;
 
-import com.api.rescuemeapi.application.helpers.PetHelper;
-import com.api.rescuemeapi.application.helpers.PetitionHelper;
-import com.api.rescuemeapi.application.helpers.UserHelper;
+import com.api.rescuemeapi.application.helpers.PetHelperService;
+import com.api.rescuemeapi.application.helpers.PetitionHelperService;
+import com.api.rescuemeapi.application.helpers.UserHelperService;
 import com.api.rescuemeapi.application.mappers.PetResponseMapper;
-import com.api.rescuemeapi.config.authentication.AuthUserProvider;
+import com.api.rescuemeapi.config.authentication.AuthenticationUserProvider;
 import com.api.rescuemeapi.domain.dtos.pet.*;
-import com.api.rescuemeapi.domain.enums.PetState;
+import com.api.rescuemeapi.domain.constants.PetState;
 import com.api.rescuemeapi.domain.models.Pet;
 import com.api.rescuemeapi.domain.models.User;
 import com.api.rescuemeapi.infrastructure.persistence.repositories.PetRepository;
@@ -29,13 +29,12 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final PetResponseMapper petResponseMapper;
-    private final AuthUserProvider authUserProvider;
-    private final PetHelper petHelper;
-    private final UserHelper userHelper;
-    private final PetitionHelper petitionHelper;
-    private final ImageService imageService;
+    private final AuthenticationUserProvider authenticationUserProvider;
+    private final PetHelperService petHelper;
+    private final UserHelperService userHelper;
+    private final PetitionHelperService petitionHelper;
 
-    public Page<PetResponse> getAll(PetFilterRequest filter) {
+    public Page<PetResponse> getAllPets(PetFilterRequest filter) {
         Specification<Pet> spec = getSpecification(filter);
 
         return petRepository.findAll(spec, filter.getPageable())
@@ -45,8 +44,8 @@ public class PetService {
     private Specification<Pet> getSpecification(PetFilterRequest filter) {
         Specification<Pet> spec = Specification.where(PetSpecification.isAvailable());
         if (filter.getIsOwned() != null && filter.getIsOwned()) {
-            Long currentUserId = authUserProvider.getUserId();
-            spec = spec.and(PetSpecification.isOwned(currentUserId));
+            String currentUserEmail = authenticationUserProvider.getUser().getUsername();
+            spec = spec.and(PetSpecification.isOwned(currentUserEmail));
         }
         if (filter.getSpeciesList() != null && !filter.getSpeciesList().isEmpty()) {
             spec = spec.and(PetSpecification.hasSpeciesIn(filter.getSpeciesList()));
@@ -63,18 +62,13 @@ public class PetService {
         return spec;
     }
 
-    public PetResponse get(Long id) {
-        Pet pet = petHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Pet not found"));
-
+    public PetResponse getPet(Long id) {
+        Pet pet = petHelper.findById(id);
         return petResponseMapper.apply(pet);
     }
 
-    public PetResponse create(CreatePetRequest request) {
-        User user = userHelper.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Authenticated user not found"));
+    public PetResponse createPet(CreatePetRequest request) {
+        User user = userHelper.getCurrentUser();
 
         UUID referenceId = UUID.randomUUID();
 
@@ -89,16 +83,12 @@ public class PetService {
                         .ownerUser(user)
                         .referenceId(referenceId)
                         .build());
-        
-        imageService.createImages(request.files(), referenceId);
 
         return petResponseMapper.apply(createdPet);
     }
 
-    public PetResponse update(Long id, UpdatePetRequest request) {
-        Pet pet = petHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Pet not found"));
+    public PetResponse updatePet(Long id, UpdatePetRequest request) {
+        Pet pet = petHelper.findById(id);
 
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
@@ -117,13 +107,6 @@ public class PetService {
         if (request.isCastrated() != null) pet.setIsCastrated(request.isCastrated());
         if (request.isDewormed() != null) pet.setIsDewormed(request.isDewormed());
         if (request.medicalNotes() != null) pet.setMedicalNotes(request.medicalNotes());
-        
-        if (request.deletedImageId() != null) {
-            imageService.deleteImage(request.deletedImageId(), pet.getReferenceId());
-        }
-        if (request.images() != null) {
-            imageService.createImages(request.images(), pet.getReferenceId());
-        }
 
         Pet updated = petRepository.save(pet);
 
@@ -131,10 +114,8 @@ public class PetService {
     }
 
     @Transactional
-    public PetResponse adopt(Long id, Long userId) {
-        Pet pet = petHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Pet not found"));
+    public PetResponse adoptPet(Long id, String email) {
+        Pet pet = petHelper.findById(id);
 
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
@@ -143,24 +124,20 @@ public class PetService {
 
         pet.setState(PetState.ADOPTED);
 
-        petitionHelper.declineAllExcept(pet, userId);
+        petitionHelper.declineAllExcept(pet, email);
 
         Pet updated = petRepository.save(pet);
 
         return petResponseMapper.apply(updated);
     }
 
-    public void delete(Long id) {
-        Pet pet = petHelper.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Pet not found"));
+    public void deletePet(Long id) {
+        Pet pet = petHelper.findById(id);
 
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Only the pet owner may delete this petition");
         }
-
-        imageService.deleteImages(pet.getReferenceId());
 
         petRepository.delete(pet);
     }

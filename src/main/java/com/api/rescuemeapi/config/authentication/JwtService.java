@@ -20,7 +20,7 @@ public class JwtService {
 
     private final JwtProperties jwtProperties;
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaims(token, Claims::getSubject);
     }
 
@@ -37,17 +37,13 @@ public class JwtService {
     }
 
     private  <T> T extractClaims(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Claims extractClaims(String token) {
-        return Jwts.parser()
+        Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
                 .json(new JacksonDeserializer<>())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+        return claimsResolver.apply(claims);
     }
 
     private SecretKey getSigningKey() {

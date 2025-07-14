@@ -1,49 +1,53 @@
 package com.api.rescuemeapi.application.helpers;
 
-import com.api.rescuemeapi.config.authentication.AuthUserProvider;
-import com.api.rescuemeapi.domain.enums.PetitionStatus;
+import com.api.rescuemeapi.application.exceptions.PetitionNotFoundException;
+import com.api.rescuemeapi.config.authentication.AuthenticationUserProvider;
+import com.api.rescuemeapi.domain.constants.PetitionStatus;
 import com.api.rescuemeapi.domain.models.Pet;
 import com.api.rescuemeapi.domain.models.Petition;
 import com.api.rescuemeapi.infrastructure.persistence.repositories.PetitionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class PetitionHelper {
+public class PetitionHelperService {
 
     private final PetitionRepository petitionRepository;
-    private final AuthUserProvider authUserProvider;
+    private final AuthenticationUserProvider authenticationUserProvider;
 
-    public Optional<Petition> findById(Long id) {
-        return petitionRepository.findById(id);
+    public Petition findById(Long id) {
+        return petitionRepository.findById(id).orElseThrow(PetitionNotFoundException::new);
     }
 
     public boolean isRequestingUser(Petition petition) {
         return petition.getRequestingUser()
-                .getId()
-                .equals(authUserProvider.getUserId());
+                .getEmail()
+                .equals(authenticationUserProvider.getUser().getUsername());
     }
 
     public boolean isPetOwner(Petition petition) {
         return petition.getRequestedPet()
                 .getOwnerUser()
-                .getId()
-                .equals(authUserProvider.getUserId());
+                .getEmail()
+                .equals(authenticationUserProvider.getUser().getUsername());
     }
 
-    public void declineAllExcept(Pet pet, Long userId) {
+    @Transactional
+    public void declineAllExcept(Pet pet, String email) {
         List<Petition> petitions = petitionRepository.findAllByRequestedPet(pet)
                 .stream()
                 .filter(petition ->
-                        !petition.getRequestingUser().getId().equals(userId))
+                        !petition.getRequestingUser().getEmail().equals(email))
                 .toList();
+
         petitions.forEach(petition -> {
             petition.setStatus(PetitionStatus.DECLINED);
-            petitionRepository.save(petition);
         });
+
+        petitionRepository.saveAll(petitions);
     }
 }

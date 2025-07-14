@@ -15,5 +15,4 @@ import java.util.UUID;
 public class CompensateUserRegisterCommand implements Serializable {
     private UUID sagaId;
     private String reason;
-    private Long userId;
 }

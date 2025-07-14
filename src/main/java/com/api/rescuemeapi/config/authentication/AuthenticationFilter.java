@@ -19,7 +19,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class AuthFilter extends OncePerRequestFilter {
+public class AuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
@@ -29,32 +29,29 @@ public class AuthFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            final String token = authHeader.substring(7);
 
-        final String token = authHeader.substring(7);
+            final String email = jwtService.extractEmail(token);
+            final Long userId = jwtService.extractUserId(token);
+            final List<GrantedAuthority> authorities = jwtService.extractUserRole(token)
+                    .stream()
+                    .map(role -> (GrantedAuthority) new SimpleGrantedAuthority(role))
+                    .toList();
 
-        final String email = jwtService.extractUsername(token);
-        final Long userId = jwtService.extractUserId(token);
-        final List<GrantedAuthority> authorities = jwtService.extractUserRole(token)
-                .stream()
-                .map(role -> (GrantedAuthority) new SimpleGrantedAuthority(role))
-                .toList();
-
-        if (userId != null
-                && email != null
-                && !authorities.isEmpty()
-                && SecurityContextHolder.getContext().getAuthentication() == null
-                && !jwtService.isTokenExpired(token)) {
-            UserPrincipal userDetails = new UserPrincipal(userId, email);
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails,null, authorities);
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (userId != null
+                    && email != null
+                    && !authorities.isEmpty()
+                    && SecurityContextHolder.getContext().getAuthentication() == null
+                    && !jwtService.isTokenExpired(token)) {
+                UserPrincipal userDetails = new UserPrincipal(userId, email);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails,null, authorities);
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);

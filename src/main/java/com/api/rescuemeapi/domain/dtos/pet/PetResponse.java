@@ -1,10 +1,10 @@
 package com.api.rescuemeapi.domain.dtos.pet;
 
 import com.api.rescuemeapi.domain.dtos.user.UserResponse;
-import com.api.rescuemeapi.domain.enums.PetSex;
-import com.api.rescuemeapi.domain.enums.PetSize;
-import com.api.rescuemeapi.domain.enums.PetSpecies;
-import com.api.rescuemeapi.domain.enums.PetState;
+import com.api.rescuemeapi.domain.constants.PetSex;
+import com.api.rescuemeapi.domain.constants.PetSize;
+import com.api.rescuemeapi.domain.constants.PetSpecies;
+import com.api.rescuemeapi.domain.constants.PetState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,11 +17,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class PetResponse implements Serializable {
-    private long id;
+    private Long id;
     private String name;
     private String description;
     private PetSpecies species;
-    private int age;
+    private Integer age;
     private PetSize size;
     private PetState state;
     private PetSex sex;

@@ -18,7 +18,6 @@ public class RabbitProperties {
     @Setter
     public static class Exchange {
         private String auth;
-        private String media;
     }
 
     @Getter
@@ -27,10 +26,6 @@ public class RabbitProperties {
         private String userRegisterCommand;
         private String userRegisterReply;
         private String compensateUserRegisterCommand;
-        private String createImagesCommand;
-        private String reorderImagesCommand;
-        private String deleteImageCommand;
-        private String deleteImagesByReferenceCommand;
     }
 
     @Getter
@@ -39,9 +34,5 @@ public class RabbitProperties {
         private String userRegisterCommand;
         private String userRegisterReply;
         private String compensateUserRegisterCommand;
-        private String createImagesCommand;
-        private String reorderImagesCommand;
-        private String deleteImageCommand;
-        private String deleteImagesByReferenceCommand;
     }
 }

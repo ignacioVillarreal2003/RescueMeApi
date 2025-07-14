@@ -1,6 +1,6 @@
 package com.api.rescuemeapi.infrastructure.persistence.specification;
 
-import com.api.rescuemeapi.domain.enums.PetState;
+import com.api.rescuemeapi.domain.constants.PetState;
 import com.api.rescuemeapi.domain.models.Pet;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -8,9 +8,9 @@ import java.util.List;
 
 public class PetSpecification {
 
-    public static Specification<Pet> isOwned(Long userId) {
+    public static Specification<Pet> isOwned(String email) {
         return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("owner_user_id"), userId);
+                criteriaBuilder.equal(root.get("ownerUser.email"), email);
     }
 
     public static Specification<Pet> isAvailable() {
