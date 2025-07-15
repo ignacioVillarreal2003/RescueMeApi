@@ -26,14 +26,14 @@ public class PetitionHelperService {
     public boolean isRequestingUser(Petition petition) {
         return petition.getRequestingUser()
                 .getEmail()
-                .equals(authenticationUserProvider.getUser().getUsername());
+                .equals(authenticationUserProvider.getUser().getEmail());
     }
 
     public boolean isPetOwner(Petition petition) {
         return petition.getRequestedPet()
                 .getOwnerUser()
                 .getEmail()
-                .equals(authenticationUserProvider.getUser().getUsername());
+                .equals(authenticationUserProvider.getUser().getEmail());
     }
 
     @Transactional

@@ -30,6 +30,6 @@ public class PetHelperService {
     public boolean isOwner(Pet pet) {
         return pet.getOwnerUser()
                 .getEmail()
-                .equals(authenticationUserProvider.getUser().getUsername());
+                .equals(authenticationUserProvider.getUser().getEmail());
     }
 }

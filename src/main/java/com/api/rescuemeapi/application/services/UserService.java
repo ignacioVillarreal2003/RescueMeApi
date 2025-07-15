@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class UserService {
     private final UserRegisterSagaPublisher userRegisterSagaPublisher;
     private final UserRegisterSagaService userRegisterSagaService;
 
+    @Transactional
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
@@ -35,6 +37,7 @@ public class UserService {
         return userResponseMapper.apply(user);
     }
 
+    @Transactional
     public InitiateRegisterUserResponse initiateRegistration(@Valid InitiateRegisterUserRequest request) {
         UUID sagaId = UUID.randomUUID();
 
@@ -54,6 +57,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
     public UserResponse completeRegistration(UserRegisterReply message) {
         String email = message.email();
 
@@ -77,6 +81,7 @@ public class UserService {
         return userResponseMapper.apply(createdUser);
     }
 
+    @Transactional
     public UserResponse updateUser(UpdateUserRequest request) {
         User user = userHelper.getCurrentUser();
 

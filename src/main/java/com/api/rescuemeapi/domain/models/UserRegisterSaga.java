@@ -11,7 +11,7 @@ import org.springframework.data.redis.core.RedisHash;
 import java.time.Instant;
 import java.util.UUID;
 
-@RedisHash(value = "user_register_saga", timeToLive = 7200)
+@RedisHash(value = "user_register_saga_rescue_me", timeToLive = 7200)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

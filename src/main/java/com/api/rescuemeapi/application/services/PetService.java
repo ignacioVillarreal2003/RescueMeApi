@@ -44,7 +44,7 @@ public class PetService {
     private Specification<Pet> getSpecification(PetFilterRequest filter) {
         Specification<Pet> spec = Specification.where(PetSpecification.isAvailable());
         if (filter.getIsOwned() != null && filter.getIsOwned()) {
-            String currentUserEmail = authenticationUserProvider.getUser().getUsername();
+            String currentUserEmail = authenticationUserProvider.getUser().getEmail();
             spec = spec.and(PetSpecification.isOwned(currentUserEmail));
         }
         if (filter.getSpeciesList() != null && !filter.getSpeciesList().isEmpty()) {

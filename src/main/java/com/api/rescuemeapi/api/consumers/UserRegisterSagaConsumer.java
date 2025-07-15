@@ -24,7 +24,6 @@ public class UserRegisterSagaConsumer {
 
     @RabbitListener(queues = "${rabbit.queue.user-register-reply}")
     public void handleRegisterUserReply(@Valid @Payload UserRegisterReply message) {
-
         if (userRegisterSagaService.isStepCompleted(message.sagaId(), RegisterSagaStep.USER_CREATED)) {
             return;
         }

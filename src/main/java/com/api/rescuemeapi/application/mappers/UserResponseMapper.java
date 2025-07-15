@@ -12,7 +12,7 @@ public class UserResponseMapper implements Function<User, UserResponse> {
     @Override
     public UserResponse apply(User user) {
         return UserResponse.builder()
-                .username(user.getUsername())
+                .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .phone(user.getPhone())

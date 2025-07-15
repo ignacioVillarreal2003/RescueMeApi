@@ -15,7 +15,7 @@ public class UserHelperService {
     private final AuthenticationUserProvider authenticationUserProvider;
 
     public User getCurrentUser() {
-        String email = authenticationUserProvider.getUser().getUsername();
+        String email = authenticationUserProvider.getUser().getEmail();
         return userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
     }
 }
