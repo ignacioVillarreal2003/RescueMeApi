@@ -1,4 +1,4 @@
-package com.api.rescuemeapi.domain.dtos.user;
+package com.api.rescuemeapi.domain.saga.command;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CompensateUserRegisterCommand implements Serializable {
+public class UserRegisterCompensationCommand implements Serializable {
     private UUID sagaId;
     private String reason;
 }

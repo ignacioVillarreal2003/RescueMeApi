@@ -1,6 +1,6 @@
 package com.api.rescuemeapi.api.controllers;
 
-import com.api.rescuemeapi.application.services.UserRegisterSagaService;
+import com.api.rescuemeapi.application.saga.services.UserRegistrationSagaStateService;
 import com.api.rescuemeapi.domain.dtos.user.*;
 import com.api.rescuemeapi.application.services.UserService;
 import jakarta.validation.Valid;
@@ -16,7 +16,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final UserRegisterSagaService userRegisterSagaService;
+    private final UserRegistrationSagaStateService sagaStateService;
 
     @GetMapping("/{email}")
     public ResponseEntity<UserResponse> getUser(@PathVariable String email) {
@@ -32,7 +32,7 @@ public class UserController {
 
     @GetMapping("registration/status/{sagaId}")
     public ResponseEntity<UserRegisterSagaResponse> getRegistrationStatus(@PathVariable UUID sagaId) {
-        UserRegisterSagaResponse response = userRegisterSagaService.getUserRegisterSagaResponse(sagaId);
+        UserRegisterSagaResponse response = sagaStateService.getUserRegisterSagaResponse(sagaId);
         return ResponseEntity.ok(response);
     }
 

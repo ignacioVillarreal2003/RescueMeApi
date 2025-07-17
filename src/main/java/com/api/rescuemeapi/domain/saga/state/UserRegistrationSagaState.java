@@ -1,6 +1,6 @@
-package com.api.rescuemeapi.domain.models;
+package com.api.rescuemeapi.domain.saga.state;
 
-import com.api.rescuemeapi.domain.constants.RegisterSagaStep;
+import com.api.rescuemeapi.domain.saga.step.UserRegistrationSagaStep;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,12 +11,12 @@ import org.springframework.data.redis.core.RedisHash;
 import java.time.Instant;
 import java.util.UUID;
 
-@RedisHash(value = "user_register_saga_rescue_me", timeToLive = 7200)
+@RedisHash(value = "user_registration_saga_rescue_me_api", timeToLive = 7200)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class UserRegisterSaga {
+public class UserRegistrationSagaState {
 
     @Id
     private UUID sagaId;
@@ -31,6 +31,8 @@ public class UserRegisterSaga {
 
     private Boolean success;
 
+    private Integer status;
+
     private String errorMessage;
 
     private String email;
@@ -39,24 +41,24 @@ public class UserRegisterSaga {
 
     private String refreshToken;
 
-    private RegisterSagaStep step;
+    private UserRegistrationSagaStep step;
 
     private Instant createdAt;
 
     private Instant updatedAt;
 
-    public UserRegisterSaga(UUID sagaId, String firstName, String lastName, String phone, String address) {
+    public UserRegistrationSagaState(UUID sagaId, String firstName, String lastName, String phone, String address) {
         this.sagaId = sagaId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.address = address;
-        this.step = RegisterSagaStep.PENDING;
+        this.step = UserRegistrationSagaStep.PENDING;
         this.createdAt = Instant.now();
         this.updatedAt = this.createdAt;
     }
 
-    public void markStep(RegisterSagaStep newStep) {
+    public void markStep(UserRegistrationSagaStep newStep) {
         this.step = newStep;
         this.updatedAt = Instant.now();
     }

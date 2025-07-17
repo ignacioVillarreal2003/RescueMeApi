@@ -1,4 +1,4 @@
-package com.api.rescuemeapi.config;
+package com.api.rescuemeapi.startup;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;

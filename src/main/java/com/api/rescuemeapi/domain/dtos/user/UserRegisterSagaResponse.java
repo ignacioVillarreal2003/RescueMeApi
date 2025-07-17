@@ -14,6 +14,7 @@ import java.io.Serializable;
 public class UserRegisterSagaResponse implements Serializable {
     private boolean success;
     private UserResponse user;
+    private Integer status;
     private String errorMessage;
     private String token;
     private String refreshToken;

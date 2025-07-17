@@ -36,7 +36,6 @@ public class PetService {
 
     public Page<PetResponse> getAllPets(PetFilterRequest filter) {
         Specification<Pet> spec = getSpecification(filter);
-
         return petRepository.findAll(spec, filter.getPageable())
                 .map(petResponseMapper);
     }
@@ -69,9 +68,7 @@ public class PetService {
 
     public PetResponse createPet(CreatePetRequest request) {
         User user = userHelper.getCurrentUser();
-
         UUID referenceId = UUID.randomUUID();
-
         Pet createdPet = petRepository.save(
                 Pet.builder()
                         .name(request.name())
@@ -83,18 +80,15 @@ public class PetService {
                         .ownerUser(user)
                         .referenceId(referenceId)
                         .build());
-
         return petResponseMapper.apply(createdPet);
     }
 
     public PetResponse updatePet(Long id, UpdatePetRequest request) {
         Pet pet = petHelper.findById(id);
-
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Only the pet owner may update this pet");
         }
-
         if (request.name() != null) pet.setName(request.name());
         if (request.description() != null) pet.setDescription(request.description());
         if (request.species() != null) pet.setSpecies(request.species());
@@ -107,38 +101,29 @@ public class PetService {
         if (request.isCastrated() != null) pet.setIsCastrated(request.isCastrated());
         if (request.isDewormed() != null) pet.setIsDewormed(request.isDewormed());
         if (request.medicalNotes() != null) pet.setMedicalNotes(request.medicalNotes());
-
         Pet updated = petRepository.save(pet);
-
         return petResponseMapper.apply(updated);
     }
 
     @Transactional
     public PetResponse adoptPet(Long id, String email) {
         Pet pet = petHelper.findById(id);
-
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Only the pet owner may update this pet");
         }
-
         pet.setState(PetState.ADOPTED);
-
         petitionHelper.declineAllExcept(pet, email);
-
         Pet updated = petRepository.save(pet);
-
         return petResponseMapper.apply(updated);
     }
 
     public void deletePet(Long id) {
         Pet pet = petHelper.findById(id);
-
         if (!petHelper.isOwner(pet)) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Only the pet owner may delete this petition");
         }
-
         petRepository.delete(pet);
     }
 }
