@@ -2,9 +2,8 @@ package com.api.rescuemeapi.domain.saga.reply;
 
 import java.util.UUID;
 
-public record UserRegisterSuccessReply(
+public record SuccessUserRegistrationReply(
         UUID sagaId,
-        String email,
         String token,
         String refreshToken
 ) {

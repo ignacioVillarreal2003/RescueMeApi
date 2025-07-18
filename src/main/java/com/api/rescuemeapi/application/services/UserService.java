@@ -1,6 +1,6 @@
 package com.api.rescuemeapi.application.services;
 
-import com.api.rescuemeapi.application.saga.services.UserRegistrationSagaStateService;
+import com.api.rescuemeapi.application.saga.services.UserRegistrationStateService;
 import com.api.rescuemeapi.infrastructure.messaging.publisher.UserRegistrationPublisher;
 import com.api.rescuemeapi.application.exceptions.UserNotFoundException;
 import com.api.rescuemeapi.application.helpers.UserHelperService;
@@ -8,7 +8,7 @@ import com.api.rescuemeapi.domain.dtos.user.*;
 import com.api.rescuemeapi.application.mappers.UserResponseMapper;
 import com.api.rescuemeapi.domain.constants.Role;
 import com.api.rescuemeapi.domain.models.User;
-import com.api.rescuemeapi.domain.saga.command.UserRegisterInitialCommand;
+import com.api.rescuemeapi.domain.saga.command.InitiateUserRegistrationCommand;
 import com.api.rescuemeapi.infrastructure.persistence.repositories.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,7 @@ public class UserService {
     private final UserHelperService userHelper;
     private final UserResponseMapper userResponseMapper;
     private final UserRegistrationPublisher publisher;
-    private final UserRegistrationSagaStateService sagaStateService;
+    private final UserRegistrationStateService sagaStateService;
 
     @Transactional
     public UserResponse getUserByEmail(String email) {
@@ -45,13 +46,15 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
         UUID sagaId = UUID.randomUUID();
-        sagaStateService.startSaga(sagaId,
+        sagaStateService.markStarted(
+                sagaId,
+                request.email(),
                 request.firstName(),
                 request.lastName(),
                 request.phone(),
                 request.address());
-        publisher.publishUserRegisterInitialCommand(
-                UserRegisterInitialCommand.builder()
+        publisher.publishInitiateUserRegistrationCommand(
+                InitiateUserRegistrationCommand.builder()
                         .sagaId(sagaId)
                         .email(request.email())
                         .password(request.password())
@@ -89,5 +92,15 @@ public class UserService {
         if (request.phone() != null) user.setPhone(request.phone());
         User updated = userRepository.save(user);
         return userResponseMapper.apply(updated);
+    }
+
+    @Transactional
+    public void handleRollbackUserRegistration(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return;
+        }
+        User user = userOpt.get();
+        userRepository.delete(user);
     }
 }

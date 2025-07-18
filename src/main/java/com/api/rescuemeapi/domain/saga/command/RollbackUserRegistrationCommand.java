@@ -12,6 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserRegisterConfirmationCommand implements Serializable {
+public class RollbackUserRegistrationCommand implements Serializable {
     private UUID sagaId;
 }

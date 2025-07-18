@@ -1,14 +1,18 @@
 package com.api.rescuemeapi.infrastructure.messaging.listener;
 
-import com.api.rescuemeapi.application.saga.orchestrator.UserRegistrationSagaOrchestrator;
-import com.api.rescuemeapi.domain.saga.reply.UserRegisterFailureReply;
-import com.api.rescuemeapi.domain.saga.reply.UserRegisterSuccessReply;
+import com.api.rescuemeapi.application.exceptions.SagaNotFoundException;
+import com.api.rescuemeapi.application.saga.orchestrator.UserRegistrationOrchestrator;
+import com.api.rescuemeapi.domain.saga.reply.FailureUserRegistrationReply;
+import com.api.rescuemeapi.domain.saga.reply.SuccessUserRegistrationReply;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.dao.TransientDataAccessException;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
@@ -17,29 +21,41 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class UserRegistrationListener {
 
-    private final UserRegistrationSagaOrchestrator orchestrator;
+    private final UserRegistrationOrchestrator orchestrator;
 
     @Retryable(
-            retryFor = { Exception.class },
+            retryFor = { AmqpException.class, TransientDataAccessException.class, SagaNotFoundException.class },
             maxAttempts = 5,
             backoff = @Backoff(delay = 1000, multiplier = 2.0)
     )
-    @RabbitListener(queues = "${rabbit.queue.user-register-success-reply}")
-    public void handleUserRegisterSuccessReply(@Valid @Payload UserRegisterSuccessReply reply) {
+    @RabbitListener(queues = "${rabbit.queue.success-user-registration-reply}")
+    public void handleSuccessUserRegistrationReply(@Valid @Payload SuccessUserRegistrationReply reply) {
         log.info("[UserRegistrationListener::handleUserRegisterSuccessReply] Received command sagaId={}", reply.sagaId());
-        orchestrator.handleUserRegisterSuccessReply(reply);
+        orchestrator.handleSuccessUserRegistrationReply(reply);
         log.info("[UserRegistrationListener::handleUserRegisterSuccessReply] Processing finished sagaId={}", reply.sagaId());
     }
 
+    @Recover
+    public void recoverSuccessUserRegistrationReply(TransientDataAccessException ex, SuccessUserRegistrationReply reply) {
+        log.error("[UserRegistrationListener::recoverInitiateUserRegistrationCommand] Initial registration permanently failed. sagaId={}", reply.sagaId(), ex);
+        orchestrator.recoverCommand(reply.sagaId());
+    }
+
     @Retryable(
-            retryFor = { Exception.class },
+            retryFor = { AmqpException.class, TransientDataAccessException.class, SagaNotFoundException.class },
             maxAttempts = 5,
             backoff = @Backoff(delay = 1000, multiplier = 2.0)
     )
-    @RabbitListener(queues = "${rabbit.queue.user-register-failure-reply}")
-    public void handleUserRegisterFailureReply(@Valid @Payload UserRegisterFailureReply reply) {
+    @RabbitListener(queues = "${rabbit.queue.failure-user-registration-reply}")
+    public void handleFailureUserRegistrationReply(@Valid @Payload FailureUserRegistrationReply reply) {
         log.info("[UserRegistrationListener::handleUserRegisterFailureReply] Received command sagaId={}", reply.sagaId());
-        orchestrator.handleUserRegisterFailureReply(reply);
+        orchestrator.handleFailureUserRegistrationReply(reply);
         log.info("[UserRegistrationListener::handleUserRegisterFailureReply] Processing finished sagaId={}", reply.sagaId());
+    }
+
+    @Recover
+    public void recoverFailureUserRegistrationReply(TransientDataAccessException ex, FailureUserRegistrationReply reply) {
+        log.error("[UserRegistrationListener::recoverInitiateUserRegistrationCommand] Initial registration permanently failed. sagaId={}", reply.sagaId(), ex);
+        orchestrator.recoverCommand(reply.sagaId());
     }
 }
